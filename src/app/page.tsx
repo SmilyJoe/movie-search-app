@@ -18,7 +18,7 @@ export default function Home() {
   const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
   const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null);
 
-  // ★ 1. ページネーション用のステート追加
+  // ページネーション用のステート
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
 
@@ -72,7 +72,7 @@ export default function Home() {
         }
         
         setMovies(data.results);
-        setTotalPages(data.total_pages > 500 ? 500 : data.total_pages); // TMDB APIの制限対策として最大500ページまで
+        setTotalPages(data.total_pages > 500 ? 500 : data.total_pages); // TMDB APIの制限対策
       } catch (err) {
         setError('映画データの取得に失敗しました。');
       } finally {
@@ -100,174 +100,192 @@ export default function Home() {
   const displayMovies = activeTab === 'search' ? filteredMovies : favorites;
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-6 md:p-12 relative pb-20">
-      <h1 className="text-3xl font-bold mb-6 text-center tracking-wider">🎬 映画検索アプリ</h1>
+    <main className="min-h-screen bg-gray-900 text-white p-6 md:p-12 relative pb-20 flex flex-col justify-between">
+      <div>
+        <h1 className="text-3xl font-bold mb-6 text-center tracking-wider">🎬 映画検索アプリ</h1>
 
-      {/* タブ切り替えボタン */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setActiveTab('search')}
-          className={`px-5 py-2 rounded-xl font-semibold transition shadow-md ${
-            activeTab === 'search'
-              ? 'bg-blue-600 text-white shadow-blue-900/50'
-              : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
-          }`}
-        >
-          🔍 映画を検索
-        </button>
-        <button
-          onClick={() => setActiveTab('favorites')}
-          className={`px-5 py-2 rounded-xl font-semibold transition shadow-md ${
-            activeTab === 'favorites'
-              ? 'bg-blue-600 text-white shadow-blue-900/50'
-              : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
-          }`}
-        >
-          ⭐ お気に入り ({favorites.length})
-        </button>
-      </div>
-
-      {/* 検索入力欄 */}
-      {activeTab === 'search' && (
-        <div className="max-w-md mx-auto mb-6">
-          <input
-            type="text"
-            value={query}
-            onChange={handleQueryChange}
-            placeholder="映画のタイトルを入力 (例: Batman, Avengers)..."
-            className="w-full px-5 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-blue-500 shadow-inner"
-          />
-        </div>
-      )}
-
-      {/* ジャンル絞り込みボタンの一覧 */}
-      {activeTab === 'search' && genres.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto mb-10">
+        {/* タブ切り替えボタン */}
+        <div className="flex justify-center gap-4 mb-6">
           <button
-            onClick={() => setSelectedGenreId(null)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-              selectedGenreId === null
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            onClick={() => setActiveTab('search')}
+            className={`px-5 py-2 rounded-xl font-semibold transition shadow-md ${
+              activeTab === 'search'
+                ? 'bg-blue-600 text-white shadow-blue-900/50'
+                : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
             }`}
           >
-            すべて
+            🔍 映画を検索
           </button>
-          {genres.map((genre) => (
+          <button
+            onClick={() => setActiveTab('favorites')}
+            className={`px-5 py-2 rounded-xl font-semibold transition shadow-md ${
+              activeTab === 'favorites'
+                ? 'bg-blue-600 text-white shadow-blue-900/50'
+                : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+            }`}
+          >
+            ⭐ お気に入り ({favorites.length})
+          </button>
+        </div>
+
+        {/* 検索入力欄 */}
+        {activeTab === 'search' && (
+          <div className="max-w-md mx-auto mb-6">
+            <input
+              type="text"
+              value={query}
+              onChange={handleQueryChange}
+              placeholder="映画のタイトルを入力 (例: Batman, Avengers)..."
+              className="w-full px-5 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-blue-500 shadow-inner"
+            />
+          </div>
+        )}
+
+        {/* ジャンル絞り込みボタンの一覧 */}
+        {activeTab === 'search' && genres.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto mb-10">
             <button
-              key={genre.id}
-              onClick={() => setSelectedGenreId(genre.id)}
+              onClick={() => setSelectedGenreId(null)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                selectedGenreId === genre.id
+                selectedGenreId === null
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
               }`}
             >
-              {genre.name}
+              すべて
             </button>
-          ))}
-        </div>
-      )}
-
-      {/* ローディング中のスピナー表示 */}
-      {activeTab === 'search' && loading && (
-        <div className="flex flex-col items-center justify-center my-16">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-400 text-sm">映画を探しています...</p>
-        </div>
-      )}
-
-      {/* エラー表示 */}
-      {activeTab === 'search' && error && <p className="text-center text-red-500 my-4">{error}</p>}
-
-      {/* 検索結果が0件のときのアナウンス */}
-      {activeTab === 'search' && !loading && displayMovies.length === 0 && !error && (
-        <div className="text-center text-gray-400 my-16">
-          <p className="text-lg">条件に一致する映画は見つかりませんでした。</p>
-          <p className="text-sm text-gray-500 mt-2">別のキーワードやジャンルを試してみてください。</p>
-        </div>
-      )}
-
-      {/* お気に入りタブが空の場合 */}
-      {activeTab === 'favorites' && favorites.length === 0 && (
-        <div className="text-center text-gray-500 my-16">
-          <p className="text-lg">お気に入りに登録された映画はまだありません。</p>
-          <p className="text-sm text-gray-600 mt-2">検索画面のハートマークを押して追加してみましょう！</p>
-        </div>
-      )}
-
-      {/* 映画一覧グリッド */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-        {displayMovies.map((movie) => {
-          const favorited = isFavorite(movie.id);
-          return (
-            <div
-              key={movie.id}
-              onClick={() => setSelectedMovie(movie)}
-              className="bg-gray-800 rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl relative group border border-gray-700/50"
-            >
+            {genres.map((genre) => (
               <button
-                onClick={(e) => toggleFavorite(movie, e)}
-                className={`absolute top-3 right-3 z-10 p-2.5 rounded-full backdrop-blur-md transition shadow-md ${
-                  favorited
-                    ? 'bg-red-500 text-white scale-110'
-                    : 'bg-black bg-opacity-60 text-gray-300 hover:text-white hover:bg-opacity-80'
+                key={genre.id}
+                onClick={() => setSelectedGenreId(genre.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                  selectedGenreId === genre.id
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                 }`}
-                title={favorited ? 'お気に入り解除' : 'お気に入りに追加'}
               >
-                {favorited ? '❤️' : '🤍'}
+                {genre.name}
               </button>
+            ))}
+          </div>
+        )}
 
-              {movie.poster_path ? (
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                  alt={movie.title}
-                  className="w-full h-64 object-cover"
-                />
-              ) : (
-                <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
-                  No Image
+        {/* ローディング中のスピナー表示 */}
+        {activeTab === 'search' && loading && (
+          <div className="flex flex-col items-center justify-center my-16">
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-400 text-sm">映画を探しています...</p>
+          </div>
+        )}
+
+        {/* エラー表示 */}
+        {activeTab === 'search' && error && <p className="text-center text-red-500 my-4">{error}</p>}
+
+        {/* 検索結果が0件のときのアナウンス */}
+        {activeTab === 'search' && !loading && displayMovies.length === 0 && !error && (
+          <div className="text-center text-gray-400 my-16">
+            <p className="text-lg">条件に一致する映画は見つかりませんでした。</p>
+            <p className="text-sm text-gray-500 mt-2">別のキーワードやジャンルを試してみてください。</p>
+          </div>
+        )}
+
+        {/* お気に入りタブが空の場合 */}
+        {activeTab === 'favorites' && favorites.length === 0 && (
+          <div className="text-center text-gray-500 my-16">
+            <p className="text-lg">お気に入りに登録された映画はまだありません。</p>
+            <p className="text-sm text-gray-600 mt-2">検索画面のハートマークを押して追加してみましょう！</p>
+          </div>
+        )}
+
+        {/* 映画一覧グリッド */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {displayMovies.map((movie) => {
+            const favorited = isFavorite(movie.id);
+            return (
+              <div
+                key={movie.id}
+                onClick={() => setSelectedMovie(movie)}
+                className="bg-gray-800 rounded-xl overflow-hidden shadow-lg cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl relative group border border-gray-700/50"
+              >
+                <button
+                  onClick={(e) => toggleFavorite(movie, e)}
+                  className={`absolute top-3 right-3 z-10 p-2.5 rounded-full backdrop-blur-md transition shadow-md ${
+                    favorited
+                      ? 'bg-red-500 text-white scale-110'
+                      : 'bg-black bg-opacity-60 text-gray-300 hover:text-white hover:bg-opacity-80'
+                  }`}
+                  title={favorited ? 'お気に入り解除' : 'お気に入りに追加'}
+                >
+                  {favorited ? '❤️' : '🤍'}
+                </button>
+
+                {movie.poster_path ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                    alt={movie.title}
+                    className="w-full h-64 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-64 bg-gray-700 flex items-center justify-center text-gray-500 text-sm">
+                    No Image
+                  </div>
+                )}
+                <div className="p-4">
+                  <h2 className="text-sm font-semibold truncate text-gray-100">{movie.title}</h2>
+                  <p className="text-xs text-gray-400 mt-1">公開日: {movie.release_date || '未定'}</p>
                 </div>
-              )}
-              <div className="p-4">
-                <h2 className="text-sm font-semibold truncate text-gray-100">{movie.title}</h2>
-                <p className="text-xs text-gray-400 mt-1">公開日: {movie.release_date || '未定'}</p>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {/* ページネーション（ページャー）のUI */}
+        {activeTab === 'search' && query.trim() && totalPages > 1 && !loading && (
+          <div className="flex justify-center items-center gap-4 mt-12">
+            <button
+              onClick={() => {
+                setPage((prev) => Math.max(prev - 1, 1));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              disabled={page === 1}
+              className="px-4 py-2 rounded-xl bg-gray-800 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition shadow"
+            >
+              ← 前へ
+            </button>
+            
+            <span className="text-sm text-gray-300">
+              <strong className="text-white">{page}</strong> / {totalPages} ページ
+            </span>
+
+            <button
+              onClick={() => {
+                setPage((prev) => Math.min(prev + 1, totalPages));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              disabled={page === totalPages}
+              className="px-4 py-2 rounded-xl bg-gray-800 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition shadow"
+            >
+              次へ →
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ★ 2. ページネーション（ページャー）のUI */}
-      {activeTab === 'search' && query.trim() && totalPages > 1 && !loading && (
-        <div className="flex justify-center items-center gap-4 mt-12">
-          <button
-            onClick={() => {
-              setPage((prev) => Math.max(prev - 1, 1));
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            disabled={page === 1}
-            className="px-4 py-2 rounded-xl bg-gray-800 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition shadow"
+      {/* フッター（クレジット・著作権表記） */}
+      <footer className="w-full py-8 mt-16 border-t border-gray-800 text-center text-gray-400 text-xs sm:text-sm">
+        <p>© 2026 Movie Search App. All rights reserved.</p>
+        <p className="mt-2">
+          Data provided by{' '}
+          <a
+            href="https://www.themoviedb.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 underline hover:text-blue-300 transition-colors font-medium"
           >
-            ← 前へ
-          </button>
-          
-          <span className="text-sm text-gray-300">
-            <strong className="text-white">{page}</strong> / {totalPages} ページ
-          </span>
-
-          <button
-            onClick={() => {
-              setPage((prev) => Math.min(prev + 1, totalPages));
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            disabled={page === totalPages}
-            className="px-4 py-2 rounded-xl bg-gray-800 text-white font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-700 transition shadow"
-          >
-            次へ →
-          </button>
-        </div>
-      )}
+            TMDB (The Movie Database)
+          </a>
+        </p>
+      </footer>
 
       {/* 詳細モーダル */}
       {selectedMovie && (
